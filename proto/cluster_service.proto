@@ -5,61 +5,29 @@ package mock.cluster.service;
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/field_mask.proto";
 
+option go_package = "github.com/denchick/mock-cluster-service-client-go;mockpostgresql";
+
 // A set of methods for managing PostgreSQL Cluster resources.
 service ClusterService {
-  // Retrieves a list of hosts for the specified cluster.
-  rpc ListHosts (ListClusterHostsRequest) returns (ListClusterHostsResponse) {
-    option (google.api.http) = { get: "/mdb/postgresql/v1/clusters/{cluster_id}/hosts" };
-  }
-
-  // // Retrieves a list of hosts for the specified PostgreSQL cluster at specified revision.
-  // rpc ListHostsAtRevision (ListClusterHostsAtRevisionRequest) returns (ListClusterHostsResponse) {
-  //   option (google.api.http) = { get: "/mdb/postgresql/v1/clusters/{cluster_id}/hosts/atRevision" };
-  // }
-
-  // Creates new hosts for a cluster.
-  rpc AddHosts (AddClusterHostsRequest) returns (AddClusterHostsMetadata) {
-    option (google.api.http) = { post: "/mdb/postgresql/v1/clusters/{cluster_id}/hosts:batchCreate" body: "*" };
-    option (yandex.cloud.api.operation) = {
-      metadata: "AddClusterHostsMetadata"
-      response: "google.protobuf.Empty"
-    };
-  }
-
-  // Deletes the specified hosts for a cluster.
-  rpc DeleteHosts (DeleteClusterHostsRequest) returns (DeleteClusterHostsMetadata) {
-    option (google.api.http) = { post: "/mdb/postgresql/v1/clusters/{cluster_id}/hosts:batchDelete" body: "*" };
-    option (yandex.cloud.api.operation) = {
-      metadata: "DeleteClusterHostsMetadata"
-      response: "google.protobuf.Empty"
-    };
-    option (yandex.cloud.api.tools.method).lint_skip.http_verb = true;
-  }
-
-  // Updates the specified hosts.
-  rpc UpdateHosts (UpdateClusterHostsRequest) returns (UpdateClusterHostsMetadata) {
-    option (google.api.http) = { post: "/mdb/postgresql/v1/clusters/{cluster_id}/hosts:batchUpdate" body: "*" };
-    option (yandex.cloud.api.operation) = {
-      metadata: "UpdateClusterHostsMetadata"
-      response: "google.protobuf.Empty"
-    };
-    option (yandex.cloud.api.tools.method).lint_skip.http_verb = true;
-  }
+  rpc ListHosts (ListClusterHostsRequest) returns (ListClusterHostsResponse);
+  rpc AddHosts (AddClusterHostsRequest) returns (AddClusterHostsMetadata);
+  rpc DeleteHosts (DeleteClusterHostsRequest) returns (DeleteClusterHostsMetadata);
+  rpc UpdateHosts (UpdateClusterHostsRequest) returns (UpdateClusterHostsMetadata);
 }
 
 message ListClusterHostsRequest {
   // ID of the PostgreSQL cluster.
   // To get the PostgreSQL cluster ID use a [ClusterService.List] request.
-  string cluster_id = 1 [(required) = true, (length) = "<=50"];
+  string cluster_id = 1;
 
   // The maximum number of results per page to return. If the number of available
   // results is larger than [page_size], the service returns a [ListClusterHostsResponse.next_page_token]
   // that can be used to get the next page of results in subsequent list requests.
-  int64 page_size = 2 [(value) = "<=1000"];
+  int64 page_size = 2;
 
   // Page token.  To get the next page of results, set [page_token] to the [ListClusterHostsResponse.next_page_token]
   // returned by a previous list request.
-  string page_token = 3 [(length) = "<=100"];
+  string page_token = 3;
 }
 
 // message ListClusterHostsAtRevisionRequest {
@@ -94,10 +62,10 @@ message ListClusterHostsResponse {
 message AddClusterHostsRequest {
   // ID of the PostgreSQL cluster to add hosts to.
   // To get the PostgreSQL cluster ID, use a [ClusterService.List] request.
-  string cluster_id = 1 [(required) = true, (length) = "<=50"];
+  string cluster_id = 1;
 
   // Configurations for PostgreSQL hosts that should be added to the cluster.
-  repeated HostSpec host_specs = 2 [(size) = "1"];
+  repeated HostSpec host_specs = 2;
 }
 
 message AddClusterHostsMetadata {
@@ -111,10 +79,10 @@ message AddClusterHostsMetadata {
 message DeleteClusterHostsRequest {
   // ID of the PostgreSQL cluster to remove hosts from.
   // To get the PostgreSQL cluster ID, use a [ClusterService.List] request.
-  string cluster_id = 1 [(required) = true, (length) = "<=50"];
+  string cluster_id = 1;
 
   // Names of hosts to delete.
-  repeated string host_names = 2 [(size) = "1", (length) = "<=253"];
+  repeated string host_names = 2;
 }
 
 message DeleteClusterHostsMetadata {
@@ -128,10 +96,10 @@ message DeleteClusterHostsMetadata {
 message UpdateClusterHostsRequest {
   // ID of the PostgreSQL cluster to update hosts in.
   // To get the PostgreSQL cluster ID, use a [ClusterService.List] request.
-  string cluster_id = 1 [(required) = true, (length) = "<=50"];
+  string cluster_id = 1;
 
   // New configurations to apply to hosts.
-  repeated UpdateHostSpec update_host_specs = 2 [(size) = "1"];
+  repeated UpdateHostSpec update_host_specs = 2;
 }
 
 message UpdateClusterHostsMetadata {
@@ -145,7 +113,7 @@ message UpdateClusterHostsMetadata {
 message UpdateHostSpec {
   // Name of the host to update.
   // To get the PostgreSQL host name, use a [ClusterService.ListHosts] request.
-  string host_name = 1 [(required) = true];
+  string host_name = 1;
 
   // [Host.name] of the host to be used as the replication source (for cascading replication).
   // To get the PostgreSQL host name, use a [ClusterService.ListHosts] request.
@@ -155,7 +123,7 @@ message UpdateHostSpec {
   // The synchronous replica replaces the master when needed.
   //
   // When a replica becomes the master, its priority is ignored.
-  google.protobuf.Int64Value priority = 3 [(value) = "0-100"];
+  google.protobuf.Int64Value priority = 3;
 
   // Configuration of a PostgreSQL server for the host.
   // ConfigHostSpec config_spec = 4;
@@ -170,12 +138,12 @@ message UpdateHostSpec {
 message HostSpec {
   // ID of the availability zone where the host resides.
   // To get a list of available zones, use the [yandex.cloud.compute.v1.ZoneService.List] request.
-  string zone_id = 1 [(length) = "<=50"];
+  string zone_id = 1;
 
   // ID of the subnet that the host should belong to. This subnet should be a part
   // of the network that the cluster belongs to.
   // The ID of the network is set in the field [Cluster.network_id].
-  string subnet_id = 2 [(length) = "<=50"];
+  string subnet_id = 2;
 
   // Whether the host should get a public IP address on creation.
   //
@@ -193,7 +161,7 @@ message HostSpec {
   // The synchronous replica replaces the master when needed.
   //
   // When a replica becomes the master, its priority is ignored.
-  google.protobuf.Int64Value priority = 5 [(value) = "0-100"];
+  google.protobuf.Int64Value priority = 5;
 
   // Configuration of a PostgreSQL server for the host.
   // ConfigHostSpec config_spec = 6;
@@ -207,8 +175,6 @@ message HostSpec {
 
 message Host {
   enum Role {
-    option (cloud.api.tools.enumeration).lint_skip.unspecified_value = true;
-
     // Role of the host in the cluster is unknown.
     ROLE_UNKNOWN = 0;
 
@@ -220,7 +186,6 @@ message Host {
   }
 
   enum ReplicaType {
-    option (cloud.api.tools.enumeration).lint_skip.unspecified_value = true;
     REPLICA_TYPE_UNKNOWN = 0; // Replica type is unknown (we have no data) or it's master
     ASYNC = 1;
     SYNC = 2;
@@ -228,8 +193,6 @@ message Host {
   }
 
   enum Health {
-    option (cloud.api.tools.enumeration).lint_skip.unspecified_value = true;
-
     // Health of the host is unknown.
     HEALTH_UNKNOWN = 0;
 
@@ -333,8 +296,6 @@ enum Type {
 }
 
 enum Health {
- option (cloud.api.tools.enumeration).lint_skip.unspecified_value = true;
-
  // Health of the server is unknown.
   HEALTH_UNKNOWN = 0;
 

@@ -5,43 +5,40 @@ import (
 
 	"google.golang.org/grpc"
 
-	postgresql "github.com/yandex-cloud/go-genproto/yandex/cloud/mdb/postgresql/v1"
+	"github.com/denchick/mock-cluster-service-client/mockpostgresql"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/operation"
 )
 
-// ClusterServiceClient is a postgresql.ClusterServiceClient with
+// ClusterServiceClient is a mockpostgresql.ClusterServiceClient with
 // lazy GRPC connection initialization.
 type ClusterServiceClient struct {
-    hosts []postgresql.Host
+	getConn func(ctx context.Context) (*grpc.ClientConn, error)
 }
 
-func NewMockClusterServiceClient() *ClusterServiceClient {
-    return &ClusterServiceClient{
-        hosts: []postgresql.Host{},
-    }
-}
-
-func (c *ClusterServiceClient) AddHosts(ctx context.Context, in *postgresql.AddClusterHostsRequest, opts ...grpc.CallOption) (*postgresql.AddClusterHostsMetadata, error) {
-
-	return postgresql.NewClusterServiceClient(conn).AddHosts(ctx, in, opts...)
-}
-
-// DeleteHosts implements postgresql.ClusterServiceClient
-func (c *ClusterServiceClient) DeleteHosts(ctx context.Context, in *postgresql.DeleteClusterHostsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+func (c *ClusterServiceClient) AddHosts(ctx context.Context, in *mockpostgresql.AddClusterHostsRequest, opts ...grpc.CallOption) (*mockpostgresql.AddClusterHostsMetadata, error) {
 	conn, err := c.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return postgresql.NewClusterServiceClient(conn).DeleteHosts(ctx, in, opts...)
+	return mockpostgresql.NewClusterServiceClient(conn).AddHosts(ctx, in, opts...)
 }
 
-// ListHosts implements postgresql.ClusterServiceClient
-func (c *ClusterServiceClient) ListHosts(ctx context.Context, in *postgresql.ListClusterHostsRequest, opts ...grpc.CallOption) (*postgresql.ListClusterHostsResponse, error) {
+// DeleteHosts implements mockpostgresql.ClusterServiceClient
+func (c *ClusterServiceClient) DeleteHosts(ctx context.Context, in *mockpostgresql.DeleteClusterHostsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return postgresql.NewClusterServiceClient(conn).ListHosts(ctx, in, opts...)
+	return mockpostgresql.NewClusterServiceClient(conn).DeleteHosts(ctx, in, opts...)
+}
+
+// ListHosts implements mockpostgresql.ClusterServiceClient
+func (c *ClusterServiceClient) ListHosts(ctx context.Context, in *mockpostgresql.ListClusterHostsRequest, opts ...grpc.CallOption) (*mockpostgresql.ListClusterHostsResponse, error) {
+	conn, err := c.getConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return mockpostgresql.NewClusterServiceClient(conn).ListHosts(ctx, in, opts...)
 }
 
 type ClusterHostsIterator struct {
@@ -54,12 +51,12 @@ type ClusterHostsIterator struct {
 	pageSize      int64
 
 	client  *ClusterServiceClient
-	request *postgresql.ListClusterHostsRequest
+	request *mockpostgresql.ListClusterHostsRequest
 
-	items []*postgresql.Host
+	items []*mockpostgresql.Host
 }
 
-func (c *ClusterServiceClient) ClusterHostsIterator(ctx context.Context, req *postgresql.ListClusterHostsRequest, opts ...grpc.CallOption) *ClusterHostsIterator {
+func (c *ClusterServiceClient) ClusterHostsIterator(ctx context.Context, req *mockpostgresql.ListClusterHostsRequest, opts ...grpc.CallOption) *ClusterHostsIterator {
 	var pageSize int64
 	const defaultPageSize = 1000
 	pageSize = req.PageSize
@@ -108,7 +105,7 @@ func (it *ClusterHostsIterator) Next() bool {
 	return len(it.items) > 0
 }
 
-func (it *ClusterHostsIterator) Take(size int64) ([]*postgresql.Host, error) {
+func (it *ClusterHostsIterator) Take(size int64) ([]*mockpostgresql.Host, error) {
 	if it.err != nil {
 		return nil, it.err
 	}
@@ -122,7 +119,7 @@ func (it *ClusterHostsIterator) Take(size int64) ([]*postgresql.Host, error) {
 		it.requestedSize = 0
 	}()
 
-	var result []*postgresql.Host
+	var result []*mockpostgresql.Host
 
 	for it.requestedSize > 0 && it.Next() {
 		it.requestedSize--
@@ -136,11 +133,11 @@ func (it *ClusterHostsIterator) Take(size int64) ([]*postgresql.Host, error) {
 	return result, nil
 }
 
-func (it *ClusterHostsIterator) TakeAll() ([]*postgresql.Host, error) {
+func (it *ClusterHostsIterator) TakeAll() ([]*mockpostgresql.Host, error) {
 	return it.Take(0)
 }
 
-func (it *ClusterHostsIterator) Value() *postgresql.Host {
+func (it *ClusterHostsIterator) Value() *mockpostgresql.Host {
 	if len(it.items) == 0 {
 		panic("calling Value on empty iterator")
 	}
@@ -151,11 +148,11 @@ func (it *ClusterHostsIterator) Error() error {
 	return it.err
 }
 
-// UpdateHosts implements postgresql.ClusterServiceClient
-func (c *ClusterServiceClient) UpdateHosts(ctx context.Context, in *postgresql.UpdateClusterHostsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
+// UpdateHosts implements mockpostgresql.ClusterServiceClient
+func (c *ClusterServiceClient) UpdateHosts(ctx context.Context, in *mockpostgresql.UpdateClusterHostsRequest, opts ...grpc.CallOption) (*operation.Operation, error) {
 	conn, err := c.getConn(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return postgresql.NewClusterServiceClient(conn).UpdateHosts(ctx, in, opts...)
+	return mockpostgresql.NewClusterServiceClient(conn).UpdateHosts(ctx, in, opts...)
 }
